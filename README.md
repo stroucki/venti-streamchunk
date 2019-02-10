@@ -12,7 +12,7 @@ storage system developed as part of Plan9.
 
 Venti is a write-once read-many object storage system, where the keys
 are the SHA1 hash of the value (data) itself. It was developed as part
-of the Plan9 operating system. A port to unix system exists.
+of the Plan9 operating system. A port to unix systems exists.
 
 Plan9's venti, even though it has several bad design decisions,
 has proven itself in my environment to be a safe, archival, WORM
@@ -79,7 +79,8 @@ stream that can be further processed.
 ## Compiling
 
 This project depends on a compiled copy of the plan9port, along with
-include files, being available.
+include files, being available. Find the code at
+[https://9fans.github.io/plan9port/].
 
 To compile, run `make`. If your plan9port installation is not in the default location, you can pass the location to make as follows:
 ```
@@ -91,7 +92,7 @@ VENTIINC=~/git/plan9port/include/ VENTILIB=~/git/plan9port/lib/ make
 Set up your environment like you would for any venti client, then to store:-
 ```
 cat | streamchunkwrite /tmp/scores
-``
+```
 To read:-
 ```
 streamchunkread /tmp/scores|cat
