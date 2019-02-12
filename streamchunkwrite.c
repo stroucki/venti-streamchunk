@@ -106,12 +106,6 @@ threadmain(int argc, char *argv[])
           sysfatal("could not initialize rabin poly");
         }
 
-// not needed
-        unsigned char *chunkbuf = (unsigned char*)malloc(max_chunk_size);
-        if (!chunkbuf) {
-          sysfatal("could not initialize chunk buffer");
-        }
-
         output_scores = (chunkdesc_t *)malloc(1024*sizeof(chunkdesc_t));
         if (!output_scores) {
           sysfatal("could not initialize output scores buffer");
