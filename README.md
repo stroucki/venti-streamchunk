@@ -236,7 +236,8 @@ system for years. Positive aspects are the inability to delete data,
 straightforward storage formats. Negative aspects are the slow protocol, 
 which does not permit transaction batching, limited support for modern 
 Unix filesystems, inability to delete data, odd implementation choices, 
-and high system load.
+fixed compression scheme, fixed block sizes using default tools, and 
+high system load.
 
 All the prior systems show bad performance, generally on the order of 
 ~15 MB/s throughput due to index lookup bottlenecks as a consequence of 
@@ -245,15 +246,22 @@ Caching to drive the Data Domain storage system throughput over 100
 MB/s.
 
 Years prior, I investigated [bup](https://bup.github.io/). It tried to 
-coerce the git source code repository backend for storing data. Git 
-tries hard to minimize the data stored, which is good for source code, 
-but when faced with a diverse data set of photographs, movies, disk 
-images and source code, as the amount of data stored grew over 1 TB, 
+coerce the git source code repository backend to store data. Git tries 
+hard to minimize the data stored, which is good for source code, but 
+when faced with a diverse data set of photographs, movies, disk images 
+and source code, as the amount of data stored grew over 1 TB, 
 performance collapsed to unusability.
 
 ## References
 
-Benjamin Zhu, Kai Li, Hugo Patterson, “Avoiding the Disk Bottleneck in 
-the Data Domain Deduplication File System”, 6th USENIX Conference on 
+Benjamin Zhu, Kai Li, Hugo Patterson: "Avoiding the Disk Bottleneck in 
+the Data Domain Deduplication File System", 6th USENIX Conference on 
 File and Storage Technologies, Feb 26-29, 2008, San Jose, CA
 
+Sean Quinlan, Sean Dorward: "Venti: a new approach to archival storage", 
+Proceedings of the USENIX Conference on File And Storage Technologies, 2 
+(2002), pp. 89-101
+
+Michael O. Rabin: "Fingerprinting by random polynomials", Technical 
+Report TR-15-81, Center for Research in Computing Technology, Harvard 
+University, 1981
