@@ -10,9 +10,10 @@ storage system developed as part of Plan9.
 
 ## Introduction to venti
 
-Venti is a write-once read-many object storage system, where the keys
-are the SHA1 hash of the value (data) itself. It was developed as part
-of the Plan9 operating system. A port to unix systems exists.
+Venti is a write-once read-many key-value storage system, where the keys 
+are the SHA1 hash of the value (data) itself. It was developed as part 
+of the Plan9 operating system. A port to Unix systems of Plan9 software 
+exists by the name of Plan9 from User Space, or plan9port.
 
 Plan9's venti, even though it has several bad design decisions,
 has proven itself in my environment to be a safe, archival, WORM
@@ -23,27 +24,30 @@ can back up files and directories, then expose them again in a
 FUSE filesystem. However, metadata such as permissions are not available
 to a degree that would permit a full restoration of state.
 
-vbackup
-reads raw filesystem data and can recreate an equivalent filesystem on
-restore, or expose it via NFS. However, it only supports a limited
-selection of filesystems. XFS and ext4 are not supported, for example.
+vbackup reads raw filesystem data and can recreate an equivalent 
+filesystem on restore, or expose it via NFS. However, it only supports a 
+limited selection of filesystems. xfs and ext4 are not supported, for 
+example.
 
-The venti tools all presuppose that data is sent in full fixed block
-increments, but internally venti stores variable blocks if a block
-ends with a series of NULs. Venti calls this "zero truncation".
+The venti tools all presuppose that data is sent in full fixed block 
+increments, but internally venti stores, by default, blocks stripped of 
+any trailing NULs. Venti calls this "zero truncation".
 
-It is possible to send individual blocks to venti, of variable sizes
-up to a maximum of 57 KB.
+It is possible to send individual blocks to venti, of variable sizes up 
+to a maximum of 57 KB (due to odd internal formatting to try to save a 
+few bytes).
 
-venti is based on fixed size blocking, so adding a byte to the beginning 
-of a file will essentially fail to exploit any similarity between the 
-two versions.
+The venti tools are based on using fixed size blocking, so adding a byte 
+to the beginning of a file will essentially fail to exploit any 
+similarity between the two versions. Similarly, any third party archive
+tools are unlikely to produce output that meets the requirements to
+obtain optimal space efficiency.
 
-## CloudFS
+## Introduction of CloudFS
 
-CloudFS is a teaching tool used to demonstrate the utility of caching, 
-content-addressable storage, compression and variable length 
-segmentation in filesystems.
+CloudFS is a teaching tool used in the graduate storage systems class 
+(18-746) to demonstrate the utility of caching, content-addressable 
+storage, compression and variable length segmentation in filesystems.
 
 In its full development, the CloudFS project is a FUSE filesystem that 
 splits data into variable length chunks, compresses them, and will store 
@@ -64,7 +68,7 @@ Since the variable block chunking mitigates the need to keep blocks
 aligned to avoid storing multiple alignments of the same data, third
 party tools can be used to create the stream of data to store.
 
-As venti allows the storage of variable blocks, this stream can be 
+As venti allows the storage of variable length blocks, this stream can be 
 provided to venti-streamchunk, which will chunk the data and submit the 
 resulting blocks to venti.
 
@@ -98,6 +102,8 @@ To read:-
 streamchunkread /tmp/scores|cat
 ```
 
+Of course `cat` can be any producer or consumer of data.
+
 If you want to override the contents of a venti environment variable, 
 you can provide one as an argument like `streamchunkwrite -h 
 'tcp!localhost!17034' /tmp/scores`.
@@ -113,16 +119,140 @@ The chunking parameters chosen were
   * max_chunk_size = 57344 bytes (venti maximum)
   * window_size = 48 bytes (chosen from SDFS)
 
+This software relies on venti to store only a single instance of the 
+same data. It does not try to avoid sending duplicate data. This allows 
+the omission of a client-side hashing of the data.
+
 On 2012-05-02, Hugo Patterson came to talk at CMU. He said that Data 
 Domain had chosen a minimum block size of 2K and a maximum of 64K.
 
 On 2016-11-28, he mentioned that a doubling of the chunk size results, 
-as a rule of thumb, into 15% extra storage usage.
+as a rule of thumb, in 15% extra storage usage.
 
 ## Evaluation
 
+### The concept
+
+A tar file of my home directory of size 93 GB was segmented with the 
+default parameters. The sum of the unique set of segments was 72 GB (77% 
+of original). The most duplicated segments were the following:
+
+```
+ 489 54428 hash-a
+ 510 4104 hash-b
+ 540 5659 hash-c
+ 592 4179 hash-d
+ 648 5609 hash-e
+ 745 4179 hash-f
+1256 4179 hash-g
+2342 57344 hash-h
+4331 4179 hash-i
+1721733 4096 hash-0
+```
+
+Table shows repetition count, block size and hash. Note that by far 
+blocks of all NULs are the most common, but in general there isn't all 
+that much repetition. I do try to avoid having multiple copies of data 
+spread around my directory. But we hope that it means that subsequent 
+backups *will* reuse most of the segments.
+
+I then took a tar file of a previous backup of my home directory and 
+processed it the same way. Original size was 146 GB. Total size of 
+unique segments was 129 GB (88%). Total number of unique chunks was 12 
+million.
+
+Sorting by repetition count ascending, the last 6 million cover around 
+35% of the data. In steps of one million segments, the amount of the 
+dataset covered is:-
+
+```
+8%, 17%, 29%, 43%, 61%, 65%, 70%, 76%, 80%, 86%, 92%, 100%
+```
+
+The first duplicated segment occurred at position 11.3 million. Within a 
+backup instance, savings from segment deduplication are likely to be 
+small. A system like venti will only keep one instance of each segment 
+in storage by design. It does not seem fruitful to provide a cache to 
+prevent duplicate writes (which would have no effect anyway). But 
+looking at the list of most duplicated segments in this dataset:-
+
+```
+ 489 54428 hash-a
+ 510 4104 hash-b
+ 540 5659 hash-c
+ 592 4179 hash-d
+ 648 5609 hash-e
+ 745 4179 hash-f
+1256 4179 hash-g
+2342 57344 hash-h
+4331 4179 hash-i
+1326485 4096 hash-0
+```
+
+We see that the only difference is the lesser amount of NUL blocks, and 
+that otherwise the data that was in the other dataset is still here.
+
+Using afio, using a different archive format than tar, resulted in a 
+size of unique segments of 128 GB. Looking at the resultant list of most 
+deduplicated segments here:-
+
+```
+ 489 54428 hash-a
+ 510 4104 hash-b
+ 540 5659 hash-c
+ 592 4179 hash-d
+ 648 5609 hash-e
+ 745 4179 hash-f
+1256 4179 hash-g
+2342 57344 hash-h
+4331 4179 hash-i
+1326412 4096 hash-0
+```
+
+As can be seen, the variable chunking makes the data essentially 
+format-agnostic. The size of extra storage incurred for using a 
+different archiver on the same data amounted to 4 GB, or 2.9%.
+
+### The system
 In short: It works, the venti protocol is slow.
 (more to come)
 
+### Alternatives
+
+I explored [Restic](https://restic.net/), positive points were that it 
+had a lot of internal parallelism due to being written in Go. Negative 
+points were no support for compression, insistence on using its own 
+encryption, requirement for cache space in the home directory, and high 
+load when using a local data store.
+
+I also explored [Borg](https://www.borgbackup.org/), positive points 
+were a slightly more efficient data store than Restic. Negative points 
+were the use of python and the lack of parallelism it entails, glacial 
+speed when using LZMA compression.
+
+[Venti](https://9fans.github.io/plan9port/) has been my workhorse backup 
+system for years. Positive aspects are the inability to delete data, 
+straightforward storage formats. Negative aspects are the slow protocol, 
+which does not permit transaction batching, limited support for modern 
+Unix filesystems, inability to delete data, odd implementation choices, 
+and high system load.
+
+All the prior systems show bad performance, generally on the order of 
+~15 MB/s throughput due to index lookup bottlenecks as a consequence of 
+minimal cache locality. The Zhu paper talks about Locality Preserved 
+Caching to drive the Data Domain storage system throughput over 100 
+MB/s.
+
+Years prior, I investigated [bup](https://bup.github.io/). It tried to 
+coerce the git source code repository backend for storing data. Git 
+tries hard to minimize the data stored, which is good for source code, 
+but when faced with a diverse data set of photographs, movies, disk 
+images and source code, as the amount of data stored grew over 1 TB, 
+performance collapsed to unusability.
+
 ## References
-(to come)
+
+Benjamin Zhu, Kai Li, Hugo Patterson, “Avoiding the Disk Bottleneck in 
+the Data Domain Deduplication File System”, 6th USENIX Conference on 
+File and Storage Technologies, Feb 26-29, 2008, San Jose, CA
+
