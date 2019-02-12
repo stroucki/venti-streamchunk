@@ -158,23 +158,24 @@ backups *will* reuse most of the segments.
 
 I then took a tar file of a previous backup of my home directory and 
 processed it the same way. Original size was 146 GB. Total size of 
-unique segments was 129 GB (88%). Total number of unique chunks was 12 
+unique segments was 129 GB (87%). Total number of unique chunks was 12 
 million.
 
-Sorting by repetition count ascending, the last 6 million cover around 
-35% of the data. In steps of one million segments, the amount of the 
-dataset covered is:-
+Sorting by (repetition * block size) ascending, in steps of one million 
+segments, the amount of the dataset covered is:-
 
 ```
-8%, 17%, 29%, 43%, 61%, 65%, 70%, 76%, 80%, 86%, 92%, 100%
+3%, 6%, 9%, 13%, 18%, 23%, 30%, 37%, 46%, 57%, 71%, 94%
 ```
 
-The first duplicated segment occurred at position 11.3 million. Within a 
-backup instance, savings from segment deduplication are likely to be 
-small. A system like venti will only keep one instance of each segment 
-in storage by design. It does not seem fruitful to provide a cache to 
-prevent duplicate writes (which would have no effect anyway). But 
-looking at the list of most duplicated segments in this dataset:-
+Less than 727000 blocks (6%) were duplicate, but they made up 18% of the 
+original data. Within a backup instance, savings from segment 
+deduplication are likely to be small but still significant. A system 
+like venti will only keep one instance of each segment in storage by 
+design. Due to the low rate of duplicate segments, it does not seem 
+fruitful to provide a cache to prevent duplicate writes (which would 
+have no effect anyway). But looking at the list of most duplicated 
+segments in this dataset:-
 
 ```
  489 54428 hash-a
