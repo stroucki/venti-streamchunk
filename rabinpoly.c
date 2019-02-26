@@ -41,8 +41,8 @@ static void polymult (u_int64_t *php, u_int64_t *plp, u_int64_t x, u_int64_t y);
 static u_int64_t polymmult (u_int64_t x, u_int64_t y, u_int64_t d);
 
 static void calcT(rabinpoly_t *rp);
-static u_int64_t slide8(rabinpoly_t *rp, u_char m);
-static u_int64_t append8(rabinpoly_t *rp, u_int64_t p, u_char m);
+static inline u_int64_t slide8(rabinpoly_t *rp, u_char m);
+static inline u_int64_t append8(rabinpoly_t *rp, u_int64_t p, u_char m);
 
 /**
  * functions to calculate the rabin hash
@@ -126,7 +126,7 @@ static void calcT(rabinpoly_t *rp)
  * Feed a new byte into the rabin sliding window and update 
  * the rabin fingerprint
  */
-static u_int64_t slide8(rabinpoly_t *rp, u_char m) 
+static inline u_int64_t slide8(rabinpoly_t *rp, u_char m) 
 {
 	rp->bufpos++;
 
@@ -138,7 +138,7 @@ static u_int64_t slide8(rabinpoly_t *rp, u_char m)
 	return rp->fingerprint = append8 (rp, rp->fingerprint ^ rp->U[om], m);
 }
 
-static u_int64_t append8(rabinpoly_t *rp, u_int64_t p, u_char m) 
+static inline u_int64_t append8(rabinpoly_t *rp, u_int64_t p, u_char m) 
 { 	
 	return ((p << 8) | m) ^ rp->T[p >> rp->shift]; 
 }
