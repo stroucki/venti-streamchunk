@@ -162,7 +162,7 @@ unique segments was 129 GB (87%). Total number of unique chunks was 12
 million.
 
 Sorting by (repetition * block size) ascending, in steps of one million 
-segments, the amount of the dataset covered is:-
+segments, the amount of the dataset cumulatively covered is:-
 
 ```
 3%, 6%, 9%, 13%, 18%, 23%, 30%, 37%, 46%, 57%, 71%, 94%
