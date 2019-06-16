@@ -27,7 +27,9 @@ to a degree that would permit a full restoration of state.
 vbackup reads raw filesystem data and can recreate an equivalent 
 filesystem on restore, or expose it via NFS. However, it only supports a 
 limited selection of filesystems. xfs and ext4 are not supported, for 
-example.
+example. For the filesystems that are supported, I am not fully 
+confident that more uncommon features such as ACLs and extended 
+attributes, and common uses such as boot blocks are supported.
 
 The venti tools all presuppose that data is sent in full fixed block 
 increments, but internally venti stores, by default, blocks stripped of 
