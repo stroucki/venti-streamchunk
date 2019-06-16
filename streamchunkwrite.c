@@ -57,11 +57,21 @@ void output(int type, uchar* p, unsigned int n, uchar score[VtScoreSize]) {
   }
 }
 
-void dump_scores(void *scores, unsigned int count) {
-  int wantout = count*sizeof(chunkdesc_t);
-  int outbytes = write(scorefd, scores, wantout);
-  if (outbytes != wantout) {
-    sysfatal("could not output scores");
+void dump_scores(chunkdesc_t *chunks, unsigned int count) {
+  const int size = 4 + VtScoreSize;
+  uchar output[size];
+  for (unsigned int n = 0; n < count; n++) {
+    chunkdesc_t *chunk = &chunks[n];
+    output[0] = chunk->blocksize & 0xff;
+    output[1] = (chunk->blocksize >> 8) & 0xff;
+    output[2] = (chunk->blocksize >> 16) & 0xff;
+    output[3] = (chunk->blocksize >> 24) & 0xff;
+    memcpy(&output[4], chunk->score, VtScoreSize);
+    int wantout = size;
+    int outbytes = write(scorefd, output, wantout);
+    if (outbytes != wantout) {
+      sysfatal("could not output scores");
+    }
   }
 }
 

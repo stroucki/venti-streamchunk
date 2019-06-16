@@ -43,32 +43,19 @@ struct chunkdesc_st {
   uchar score[VtScoreSize];
 };
 
+uchar input[4 + VtScoreSize];
+
 typedef struct chunkdesc_st chunkdesc_t;
 
 VtConn *z;
 int scorefd;
-
-void output(int type, uchar* p, unsigned int n, uchar score[VtScoreSize]) {
-  n = vtzerotruncate(type, p, n);
-  if (vtwrite(z, score, type, p, n) < 0) {
-    sysfatal("vtwrite: %r");
-  }
-}
-
-void dump_scores(void *scores, unsigned int count) {
-  int wantout = count*sizeof(chunkdesc_t);
-  int outbytes = write(scorefd, scores, wantout);
-  if (outbytes != wantout) {
-    sysfatal("could not output scores");
-  }
-}
 
 void
 threadmain(int argc, char *argv[])
 {
 	char *host;
         int type;
-        chunkdesc_t* input_scores;
+        uchar* input_scores;
         
         unsigned char buf[65536];
         unsigned int nbytes = 0;
@@ -90,7 +77,7 @@ threadmain(int argc, char *argv[])
 	if(argc != 1)
 		usage();
 
-        input_scores = (chunkdesc_t *)malloc(1024*sizeof(chunkdesc_t));
+        input_scores = (uchar *)malloc(1024*sizeof(input));
         if (!input_scores) {
           sysfatal("could not initialize input scores buffer");
         }
@@ -106,22 +93,25 @@ threadmain(int argc, char *argv[])
 	if(vtconnect(z) < 0)
 		sysfatal("vtconnect: %r");
 
-        int segment_len = 0;
-
         unsigned int pos = 0;
         int n;
-        while ((nbytes = read(scorefd, input_scores, 1024*sizeof(chunkdesc_t))) > 0) {
-          while (pos * sizeof(chunkdesc_t) < nbytes) {
-
-            segment_len = input_scores[pos].blocksize;
-            n = vtread(z, input_scores[pos].score, type, buf, segment_len);
+        unsigned int size;
+        uchar *scoreptr;
+        while ((nbytes = read(scorefd, input_scores, 1024*sizeof(input))) > 0) {
+          while (pos * sizeof(input) < nbytes) {
+            scoreptr = input_scores + pos * sizeof(input);
+            size = scoreptr[0];
+            size += scoreptr[1] << 8;
+            size += scoreptr[2] << 16;
+            size += scoreptr[3] << 24;
+            n = vtread(z, &scoreptr[4], type, buf, size);
             if (n < 0) {
               sysfatal("could not read block: %r");
             }
-            if (n < segment_len) {
-              memset(buf+n, 0, segment_len-n);
+            if (n < size) {
+              memset(buf+n, 0, size-n);
             }
-            write(1, buf, segment_len);
+            write(1, buf, size);
 
             pos++;
           }
