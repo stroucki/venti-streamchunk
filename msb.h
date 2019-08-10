@@ -39,7 +39,7 @@
 EXTERN_C const char bytemsb[];
 
 /* Find last set (most significant bit) */
-static inline u_int fls32 (u_int32_t v)
+static inline unsigned int fls32 (u_int32_t v)
 {
   if (v & 0xffff0000) {
     if (v & 0xff000000)
@@ -60,7 +60,7 @@ static inline u_int fls32 (u_int32_t v)
 //    return v ? (int) fls32 (v - 1) : -1;
 //  }
 
-//static inline u_int fls64 (u_int64_t) __attribute__ ((const));
+//static inline unsigned_int fls64 (u_int64_t) __attribute__ ((const));
 static inline char fls64 (u_int64_t v)
 {
   u_int32_t h;
@@ -87,7 +87,7 @@ log2c64 (u_int64_t v)
 
 EXTERN_C const char bytelsb[];
 
-static inline u_int
+static inline unsigned int
 ffs32 (u_int32_t v)
 {
   int vv;
@@ -105,7 +105,7 @@ ffs32 (u_int32_t v)
     return 0;
 }
 
-static inline u_int
+static inline unsigned int
 ffs64 (u_int64_t v)
 {
   u_int32_t l;

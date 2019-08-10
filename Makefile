@@ -7,7 +7,7 @@ ifndef VENTIINC
 endif
 
 ifndef CFLAGS
-  CFLAGS=-g -Wall
+  CFLAGS=-g -Wall --std=c99
 endif
 
 main: streamchunkread.o streamchunkwrite.o msb.o rabinpoly.o
