@@ -110,6 +110,9 @@ If you want to override the contents of a venti environment variable,
 you can provide one as an argument like `streamchunkwrite -h 
 'tcp!localhost!17034' /tmp/scores`.
 
+The score file can be "-", which will cause scores to be read from 
+standard input, or written to standard output, respectively.
+
 ## Technical detail
 
 The list of hashes and sizes is currently a sequence of { block size 
