@@ -122,9 +122,13 @@ threadmain(int argc, char *argv[])
         }
         unsigned int scoreptr = 0;
 
-        scorefd = create(argv[0], OWRITE, 0600);
-        if (scorefd < 0) {
-          sysfatal("could not open score file: %r");
+        if (argv[0][0] == '-' && argv[0][1] == 0) {
+          scorefd = 1;
+        } else {
+          scorefd = create(argv[0], OWRITE, 0600);
+          if (scorefd < 0) {
+            sysfatal("could not open score file: %r");
+          }
         }
 
 	z = vtdial(host);

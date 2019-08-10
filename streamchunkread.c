@@ -82,9 +82,13 @@ threadmain(int argc, char *argv[])
           sysfatal("could not initialize input scores buffer");
         }
 
-        scorefd = open(argv[0], OREAD);
-        if (scorefd < 0) {
-          sysfatal("could not open score file: %r");
+        if (argv[0][0] == '-' && argv[0][1] == 0) {
+          scorefd = 0;
+        } else {
+          scorefd = open(argv[0], OREAD);
+          if (scorefd < 0) {
+            sysfatal("could not open score file: %r");
+          }
         }
 
 	z = vtdial(host);
