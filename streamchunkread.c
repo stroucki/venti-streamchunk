@@ -55,9 +55,9 @@ threadmain(int argc, char *argv[])
 {
 	char *host;
         int type;
-        uchar* input_scores;
+        uchar* scorebuf;
         
-        unsigned char buf[65536];
+        unsigned char outbuf[65536];
         unsigned int nbytes = 0;
 
 	fmtinstall('F', vtfcallfmt);
@@ -77,8 +77,8 @@ threadmain(int argc, char *argv[])
 	if(argc != 1)
 		usage();
 
-        input_scores = (uchar *)malloc(1024*sizeof(input));
-        if (!input_scores) {
+        scorebuf = (uchar *)malloc(1024*sizeof(input));
+        if (!scorebuf) {
           sysfatal("could not initialize input scores buffer");
         }
 
@@ -97,37 +97,42 @@ threadmain(int argc, char *argv[])
 	if(vtconnect(z) < 0)
 		sysfatal("vtconnect: %r");
 
-        unsigned int pos = 0;
         int n;
         unsigned int size;
         uchar *scoreptr;
-        while ((nbytes = read(scorefd, input_scores, 1024*sizeof(input))) > 0) {
-          while (pos * sizeof(input) < nbytes) {
-            scoreptr = input_scores + pos * sizeof(input);
+        uchar* scorebufinptr = scorebuf;
+        uchar* scorebufoutptr = scorebuf;
+        while ((nbytes = read(scorefd, scorebufinptr, 1024*sizeof(input) - (scorebufinptr - scorebuf))) > 0) {
+          scorebufinptr += nbytes;
+          while (scorebufoutptr + sizeof(input) <= scorebufinptr) {
+            scoreptr = scorebufoutptr;
             size = scoreptr[0];
             size += scoreptr[1] << 8;
             size += scoreptr[2] << 16;
             size += scoreptr[3] << 24;
-            n = vtread(z, &scoreptr[4], type, buf, size);
+            n = vtread(z, &scoreptr[4], type, outbuf, size);
             if (n < 0) {
               sysfatal("could not read block: %r");
             }
             if (n < size) {
-              memset(buf+n, 0, size-n);
+              memset(outbuf+n, 0, size-n);
             }
-            write(1, buf, size);
+            write(1, outbuf, size);
 
-            pos++;
+            scorebufoutptr += sizeof(input);
           }
-        pos = 0;
-      }
 
-      if (close(scorefd)) {
-        sysfatal("problems closing score file");
-      }
+          if (scorebufinptr == scorebufoutptr) {
+            scorebufinptr = scorebufoutptr = scorebuf;
+          }
+        }
+
+        if (close(scorefd)) {
+          sysfatal("problems closing score file");
+        }
 
 
-        free(input_scores);
+        free(scorebuf);
 	vthangup(z);
 	threadexitsall(0);
 }
