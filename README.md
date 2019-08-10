@@ -31,19 +31,19 @@ example. For the filesystems that are supported, I am not fully
 confident that more uncommon features such as ACLs and extended 
 attributes, and common uses such as boot blocks are supported.
 
-The venti tools all presuppose that data is sent in full fixed block 
-increments, but internally venti stores, by default, blocks stripped of 
-any trailing NULs. Venti calls this "zero truncation".
-
-It is possible to send individual blocks to venti, of variable sizes up 
-to a maximum of 57 KB (due to odd internal formatting to try to save a 
-few bytes).
-
 The venti tools are based on using fixed size blocking, so adding a byte 
 to the beginning of a file will essentially fail to exploit any 
 similarity between the two versions. Similarly, any third party archive
 tools are unlikely to produce output that meets the requirements to
 obtain optimal space efficiency.
+
+While the venti tools all presuppose that data is sent in full fixed 
+block increments, internally venti stores, by default, blocks stripped 
+of any trailing NULs. Venti calls this "zero truncation".
+
+It is possible to send individual blocks to venti, of variable sizes up 
+to a maximum of 57 KB (due to odd internal formatting to try to save a 
+few bytes).
 
 ## Introduction of CloudFS
 
