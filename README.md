@@ -219,9 +219,35 @@ As can be seen, the variable chunking makes the data essentially
 format-agnostic. The size of extra storage incurred for using a 
 different archiver on the same data amounted to 4 GB, or 2.9%.
 
-### The system
-In short: It works, the venti protocol is slow.
-(more to come)
+### Case study
+
+A git server for a research group was backed up 44 times over the past 
+seven months. Data was collected as a complete tar file of the entire 
+git partition. Initial data size was 1.97 GB, once completed, the 
+hosting venti registered 1.64 GB of managed storage which consumed 1.61 
+GB of disk space. Even on this single backup instance, 17% of data was 
+already being saved due to the inherent deduplication. Git repositories 
+are composed of compressed files, smaller objects and larger packs. Not 
+much compression was expected here, aside from the tar metadata.
+
+A further 43 backups were taken; the partition had grown to 2.58 GB by 
+now. Some objects had been coalesced into packs. The hosting venti 
+registered 2.34 GB of managed storage consuming 2.25 GB of disk space. 
+The backup system is maintaining 43 full and complete point in time 
+backups in 10% less space than the source partition currently occupies.
+
+The marginal cost for all history was calculated to be 160 MB occupying 
+102 MB of storage, or under 5 % of total storage..
+
+Additional savings of time and space would have been possible if some 
+backups had been made incrementally.
+
+The venti protocol is unencrypted, but can be tunneled over ssh. The 
+protocol is based on a single transmission and response in flight at a 
+time, so latency can comprise a significant part of backup time. An 
+alternative for encrypted transfer can be to move the data stream over 
+ssh, then store to venti using a connection on localhost. Expect 
+transfer rates of 15 MB/s or 25 MB/s respectively.
 
 ### Alternatives
 
