@@ -113,6 +113,22 @@ you can provide one as an argument like `streamchunkwrite -h
 The score file can be "-", which will cause scores to be read from 
 standard input, or written to standard output, respectively.
 
+## Security
+
+The hashes used as keys for venti are intended to be computationally 
+infeasible to derive by an attacker, even with some knowledge of what 
+data there could be. However anyone in possession of the score file, or 
+the hashes contained within, can retrieve the data from venti.
+
+Therefore, just like with the venti tools themselves, the score files 
+should be protected from unauthorized access commensurately with the 
+required security of the data that they point to.
+
+A conceivable high-security management scheme could be to (repeatedly) 
+submit the score files themselves until a single block (24 bytes) or 
+manageable amount remains, then print the contents of the score file to 
+a secure log printer.
+
 ## Technical detail
 
 The list of hashes and sizes is currently a sequence of { block size 
@@ -233,11 +249,11 @@ much compression was expected here, aside from the tar metadata.
 A further 43 backups were taken; the partition had grown to 2.58 GB by 
 now. Some objects had been coalesced into packs. The hosting venti 
 registered 2.34 GB of managed storage consuming 2.25 GB of disk space. 
-The backup system is maintaining 43 full and complete point in time 
+The backup system is maintaining 44 full and complete point in time 
 backups in 10% less space than the source partition currently occupies.
 
 The marginal cost for all history was calculated to be 160 MB occupying 
-102 MB of storage, or under 5 % of total storage..
+102 MB of storage, or under 5 % of total storage.
 
 Additional savings of time and space would have been possible if some 
 backups had been made incrementally.
