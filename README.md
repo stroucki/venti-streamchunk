@@ -237,7 +237,7 @@ different archiver on the same data amounted to 4 GB, or 2.9%.
 
 ### Case study
 
-A git server for a research group was backed up 44 times over the past 
+A git server for a research group was backed up 44 times over
 seven months. Data was collected as a complete tar file of the entire 
 git partition. Initial data size was 1.97 GB, once completed, the 
 hosting venti registered 1.64 GB of managed storage which consumed 1.61 
@@ -297,7 +297,12 @@ coerce the git source code repository backend to store data. Git tries
 hard to minimize the data stored, which is good for source code, but 
 when faced with a diverse data set of photographs, movies, disk images 
 and source code, as the amount of data stored grew over 1 TB, 
-performance collapsed to unusability.
+performance collapsed to unusability. An initial fill of the repository 
+completed at an overall rate of 10 MB/s. A subsequent update of that 
+data to the repository could only finish at about 5 MB/s. 1.6 TB of data 
+backed up in 310618 seconds - that's more than three and one half days. 
+It did have good storage efficiency: Final size of the repository was 
+1.2 TB.
 
 ## References
 
