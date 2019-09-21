@@ -237,6 +237,8 @@ different archiver on the same data amounted to 4 GB, or 2.9%.
 
 ### Case study
 
+#### Git server
+
 A git server for a research group was backed up 44 times over
 seven months. Data was collected as a complete tar file of the entire 
 git partition. Initial data size was 1.97 GB, once completed, the 
@@ -264,6 +266,57 @@ time, so latency can comprise a significant part of backup time. An
 alternative for encrypted transfer can be to move the data stream over 
 ssh, then store to venti using a connection on localhost. Expect 
 transfer rates of 15 MB/s or 25 MB/s respectively.
+
+#### Complete personal storage
+
+An individual's complete corpus of storage was backed up, containing a 
+wide variety of data such as OS images, video files, audio files, 
+photography files, source code, email messages, log files etc.
+
+At the end, venti reported 1.99 TB compressed bytes of storage versus 
+2.15 TB raw bytes of storage. That reflects compression savings of 7.2%. 
+
+Total storage pointed to by chunk files was 3.39 TB in 347m chunks. 128m 
+chunks were blocks containing only NUL bytes. The second most common 
+chunk appeared only 25047 times.
+
+There were 180m unique blocks. Summed up, they added to 2.17 TB of data. 
+Average block size stored by venti was 11700 bytes.
+
+Based on the data obtained, 37% of space was saved through 
+deduplication. Excluding NUL blocks, the savings rate becomes 20-25%.
+
+A 1/256 sample of the chunk keyspace showed that the sample was 99.8% of 
+the keys comprised in that sample. Given three bytes of the key, the 
+average number of blocks starting with those three bytes would be about 
+11.
+
+A later analysis of the data when each set of files to be backed up had 
+been backed up twice, about six months apart, shows a deduplication 
+savings of 57% (excluding NUL blocks, 2.15 TB in individual chunks with 
+5.02 TB submitted).
+
+The more recent backups submitted 2.13 TB, yet only 0.164 TB of new 
+individual chunks entered venti. That comes to 0.0770 bytes of venti 
+storage for every byte of backup data.
+
+This shows that the great benefit of deduplicated backups comes not from 
+particularly great economies from compression and deduplication at the 
+individual backup event, but from the constantness of most data over time.
+
+#### General expectations for use
+
+From the above, it follows that once a venti system has been dimensioned 
+to about the size of the data to be managed, many additional backups can 
+be made at low marginal cost, provided the data does not vary wildly.
+
+An example of a data set that stresses the storage would be one where 
+large files with random data, frequently removed and recreated, are 
+being backed up.
+
+An example of a data set that is easy on the storage would be a set of 
+virtual machine images, where the operating system is duplicated 
+multiple times over the images.
 
 ### Alternatives
 
