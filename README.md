@@ -233,7 +233,10 @@ deduplicated segments here:-
 
 As can be seen, the variable chunking makes the data essentially 
 format-agnostic. The size of extra storage incurred for using a 
-different archiver on the same data amounted to 4 GB, or 2.9%.
+different archiver on the same data amounted to 4 GB, or 2.9%. Less 
+sharing of data will be seen when using an archiver (which stores files 
+sequentially) together with disk images or filesystem dumps (where 
+segments of a file may be dispersed and interleaved with others).
 
 ### Case study
 
