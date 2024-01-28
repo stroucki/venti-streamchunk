@@ -39,18 +39,34 @@
 EXTERN_C const char bytemsb[];
 
 /* Find last set (most significant bit) */
-static inline unsigned int fls32 (u_int32_t v)
+// from /usr/src/linux/include/asm-generic/bitops/fls.h
+static inline unsigned int fls32 (u_int32_t x)
 {
-  if (v & 0xffff0000) {
-    if (v & 0xff000000)
-      return 24 + bytemsb[v>>24];
-    else
-      return 16 + bytemsb[v>>16];
-  }
-  if (v & 0x0000ff00)
-    return 8 + bytemsb[v>>8];
-  else
-    return bytemsb[v];
+        unsigned int r = 32;
+
+        if (!x)
+                return 0;
+        if (!(x & 0xffff0000u)) {
+                x <<= 16;
+                r -= 16;
+        }
+        if (!(x & 0xff000000u)) {
+                x <<= 8;
+                r -= 8;
+        }
+        if (!(x & 0xf0000000u)) {
+                x <<= 4;
+                r -= 4;
+        }
+        if (!(x & 0xc0000000u)) {
+                x <<= 2;
+                r -= 2;
+        }
+        if (!(x & 0x80000000u)) {
+                x <<= 1;
+                r -= 1;
+        }
+        return r;
 }
 
 /* Ceiling of log base 2 */
