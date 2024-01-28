@@ -1,6 +1,7 @@
 // $Id$
 
 /*
+ * Copyright (C) 2024 Michael Stroucken (mxs@cmu.edu)
  * Copyright (C) 2013 Pavan Kumar Alampalli (pavankumar@cmu.edu)
  * Copyright (C) 2004 Hyang-Ah Kim (hakim@cs.cmu.edu)
  * Copyright (C) 1999 David Mazieres (dm@uun.org)
@@ -177,6 +178,12 @@ rabinpoly_t *rabin_init(unsigned int window_size,
 	rp->fingerprint = 0;
 	rp->bufpos = -1;
 	rp->cur_seg_size = 0;
+	if (min_segment_size > window_size) {
+		rp->new_undersize = min_segment_size - window_size;
+	} else {
+		rp->new_undersize = 0;
+	}
+	rp->undersize = rp->new_undersize;
 
 	calcT(rp);
 
@@ -200,7 +207,18 @@ int rabin_segment_next(rabinpoly_t *rp,
 	}
 
 	*is_new_segment = 0;
-	for (i = 0; i < bytes; i++) {
+        i = 0;
+        if (bytes > rp->undersize) {
+		i += rp->undersize;
+		rp->cur_seg_size += rp->undersize;
+		rp->undersize = 0;
+        } else {
+		i = bytes;
+		rp->cur_seg_size += bytes;
+		rp->undersize -= bytes;
+	}
+
+	for (; i < bytes; i++) {
 		slide8(rp, buf[i]);
 		rp->cur_seg_size++;
 
@@ -212,6 +230,7 @@ int rabin_segment_next(rabinpoly_t *rp,
 				|| (rp->cur_seg_size == rp->max_segment_size)) {
 			*is_new_segment = 1;
 			rp->cur_seg_size = 0;
+			rp->undersize = rp->new_undersize;
 			return i+1;
 		}
 	}
@@ -223,6 +242,7 @@ void rabin_reset(rabinpoly_t *rp) {
 	rp->fingerprint = 0; 
 	rp->bufpos = -1;
 	rp->cur_seg_size = 0;
+	rp->undersize = rp->new_undersize;
         memset(rp->buf, 0, rp->window_size*sizeof (unsigned char));
 }
 

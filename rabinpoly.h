@@ -1,6 +1,7 @@
 // $Id$
 
 /* 
+ * Copyright (C) 2024 Michael Stroucken (mxs@cmu.edu)
  * Copyright (C) 2013 Pavan Kumar Alampalli (pavankumar@cmu.edu)
  * Copyright (C) 2004 Hyang-Ah Kim (hakim@cs.cmu.edu)
  * Copyright (C) 2000 David Mazieres (dm@uun.org)
@@ -43,6 +44,8 @@ struct rabinpoly {
 	unsigned char *buf;				// circular buffer of size 'window_size'
 	unsigned int bufpos;		// current position in ciruclar buffer
 	unsigned int cur_seg_size;	// tracks size of the current active segment 
+	unsigned int undersize;		// bytes that can be ignored while min_segment_size is not yet met
+	unsigned int new_undersize;	// value to reset undersize to on new segment
 
   	int shift;
 	u_int64_t T[256];		// Lookup table for mod
