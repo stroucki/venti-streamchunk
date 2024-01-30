@@ -299,14 +299,17 @@ been backed up twice, about six months apart, shows a deduplication
 savings of 57% (excluding NUL blocks, 2.15 TB in individual chunks with 
 5.02 TB submitted).
 
-The most recent backups submitted 2.42 TB, yet only 0.272 TB of new
-individual chunks entered venti. That comes to 0.0792 bytes of venti
-storage for every byte of backup data.
+The fifth semiannual backup submitted 2.2 TB, yet only 0.17 TB of new 
+individual chunks entered venti. That comes to 0.078 bytes of additional 
+venti storage for every byte of backup data. At that time, 12 TB of data 
+were served from 2.5 TB of data in venti. Compression accounted for an 
+additional 7.4% of storage savings. 235m blocks were stored in venti, with 
+the average block size at 11588 bytes.
 
-Currently, after five semiannual backups, 11.972 TB of data are served 
-from 2.72 TB of data in venti. Compression only accounts for an 
-additional 7.4% of storage savings. 235m blocks are stored in venti. 
-Average block size now is 11588 bytes.
+After ten semiannual backups, 24 TB of data are served from 3.6 TB of data 
+in venti. At this point, the disk was considered full and a new disk was 
+acquired. At the next semiannual backup event, the initial submission of 
+3.8 TB was stored in 3.4 TB of venti storage.
 
 This shows that the great benefit of deduplicated backups comes not from 
 particularly great economies arising from compression and deduplication 
