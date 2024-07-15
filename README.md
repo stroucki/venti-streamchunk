@@ -1,7 +1,7 @@
 venti-streamchunk
 =================
 
-(c) 2019 by Michael Stroucken <mxs@cmu.edu>
+(c) 2019-2024 by Michael Stroucken <mxs@cmu.edu>
 
 This program was inspired by the 18-746 Storage Systems
 class at CMU, which currently has for its second lab a variable chunked
@@ -64,7 +64,7 @@ project is included in this project.
 
 The code in this project is based on the read/readfile and 
 write/writefile samples in src/cmd/venti, along with the Rabin 
-polynomial code provided in 18-746.
+polynomial code provided in CMU course 18-746.
 
 Since the variable block chunking mitigates the need to keep blocks
 aligned to avoid storing multiple alignments of the same data, third
@@ -270,6 +270,29 @@ alternative for encrypted transfer can be to move the data stream over
 ssh, then store to venti using a connection on localhost. Expect 
 transfer rates of 15 MB/s or 25 MB/s respectively.
 
+#### Chromium development environment
+
+A BTRFS subvolume with copies of the Chromium browser source, originally 
+duplicated via reflinks, then modified individually and compiled, was 
+backed up using the `btrfs send` command. `bees` is run on the filesystem 
+to automatically deduplicate data. Full backups of the subvolume were 
+taken between 2020 and 2024 at different times. `btrfs send` by default 
+will uncompress data and interleave metadata in the stream. Explicit 
+reflink copies are efficiently transmitted via `btrfs send`, but `bees` is 
+known to break metadata sharing. Interestingly, each backup still shared 
+around 80% of data with existing backups. Each backup on average was 130G 
+in size and eight backups took a total of 300 GB of space.
+
+Using tar as an archiver backed up 280 GB. Data sharing to the existing 
+venti was less than using `btrfs send`, at about 67%, and 14 GB of extra 
+storage space was used. If stored by itself, the tarred data would have 
+taken 78 GB, around half of the space used by `btrfs send`.
+
+`btrfs send` was able to reduce the gross amount of data sent, provided 
+shared metadata was not broken by `bees`, usually as a result of 
+compilations and revision control system actions. However, the net amount 
+of archival storage was larger.
+
 #### Complete personal storage
 
 An individual's complete corpus of storage was backed up, containing a 
@@ -299,17 +322,16 @@ been backed up twice, about six months apart, shows a deduplication
 savings of 57% (excluding NUL blocks, 2.15 TB in individual chunks with 
 5.02 TB submitted).
 
-The fifth semiannual backup submitted 2.2 TB, yet only 0.17 TB of new 
-individual chunks entered venti. That comes to 0.078 bytes of additional 
-venti storage for every byte of backup data. At that time, 12 TB of data 
-were served from 2.5 TB of data in venti. Compression accounted for an 
-additional 7.4% of storage savings. 235m blocks were stored in venti, with 
-the average block size at 11588 bytes.
+The eighth semiannual backup submitted 2.5 TB, yet only 0.23 TB of new 
+individual chunks entered venti. That comes to 0.092 bytes of venti 
+storage for every byte of backup data.
 
-After ten semiannual backups, 24 TB of data are served from 3.6 TB of data 
-in venti. At this point, the disk was considered full and a new disk was 
-acquired. At the next semiannual backup event, the initial submission of 
-3.8 TB was stored in 3.4 TB of venti storage.
+After eight semiannual backups, 24 TB of data were served from 3.6 TB of 
+data in venti. Compression only accounted for an additional 7% of storage 
+savings. At that point, the storage medium was exhausted, and subsequent 
+backups were made to a new hard drive. At the next semiannual backup 
+event, the initial submission of 3.8 TB was stored in 3.4 TB of venti 
+storage.
 
 This shows that the great benefit of deduplicated backups comes not from 
 particularly great economies arising from compression and deduplication 
